@@ -1,0 +1,92 @@
+# Simulate network turbulence with Docker containers.
+
+This is a small explainer & example of how to create a server client network turbulence.
+
+## The Why, are we doing this
+
+Many time in our develpment goals we need to test our app in a network environmental not ideal. 
+Instead of tracking into the mountain or having server with large traffic hits we can simiulate our applicaitons in world of hurt on both the client and server side through docker.
+but note this will just help with deplying your app never forget real world deployment will always be diffrent then our test environmental so log track and watch are the gold standards when it comes to the real world
+I use an unoffical word (turbulence) on purpose as what our goal is to introduce Network Delay, Packet Loss and Corruptions and Bandwidth limitions.
+
+### What are Network Delay, Packet Loss and Corruptions and Bandwidth limitions?
+
+good quetions, you could google it.
+
+### Network Delay 
+
+Network Delay also known as network latency or lag, is the time it takes for data to pass through a network. It's a key performance characteristic of telecommunications networks. 
+
+#### How is network delay measured? 
+
+Network delay is typically measured in milliseconds or fractions of a second
+Engineers usually report both the average and maximum delay
+
+#### What causes network delay? 
+
+physical distance between devices, network congestion, hardware and software limitations, and the protocol used for data transmission. 
+
+#### What are the effects of network delay?
+
+High network latency can cause applications to perform poorly or fail 
+High network latency can cause disruptions in online activities, such as video calls, online gaming, and real-time data updates 
+
+### Packet loss & Corruptions
+
+"Packet loss" refers to when a data packet fails to reach its intended destination during transmission across a network, essentially meaning it is completely missing, while "packet corruption" occurs when a packet arrives at its destination but contains altered data, meaning the information within the packet is not accurate due to errors during transmission; both can disrupt network communication and cause issues with applications relying on reliable data transfer. 
+
+#### Key Differences:
+
+- Missing vs. Altered Data:
+In packet loss, the entire packet is simply not received, while in packet corruption, the packet arrives but with incorrect information within it. 
+
+- Detection:
+Packet loss is usually easier to detect as the receiving device will simply not receive the expected data, whereas packet corruption might not be immediately apparent without error checking mechanisms. 
+
+#### Causes of Packet Loss and Corruption:
+
+- Network Congestion: Too many devices trying to send data simultaneously can lead to packets being dropped. 
+- Faulty Network Hardware: Damaged cables, malfunctioning network devices like routers or switches can cause data corruption. 
+- Wireless Interference: Signal disruptions from other devices can lead to packet loss on wireless networks. 
+- Physical Distance: Signal degradation over long distances can contribute to packet loss. 
+- Transmission Errors: Random errors in the data stream during transmission can cause corruption. 
+
+#### Impact of Packet Loss and Corruption:
+- Lag and Stuttering: In applications like video calls, packet loss can manifest as choppy video or audio glitches. 
+- File Transfer Errors: Incomplete file downloads or uploads can occur due to missing packets. 
+- Application Errors: Corrupted data can lead to unexpected errors within applications that rely on accurate data. 
+
+## The How, we will do it
+
+Throught the traffic control (tc) command, it's a Linux utilty that give you the ability to configure the kernal packet scheduler.
+Since we are messing with the kernal level scheduler this leaves us room to build or add to the container whatever tech stack we want for the frontend (android or desktop) and backend.
+you will need to take the starting container file and mod it to fit your projects needs but an example code is there for you to mess with.
+
+once we build a small sample frontend and backend with docker compose
+
+``
+docker compose up 
+``
+
+we can run the commands to mod the server and client using 
+```
+docker exec NAMEOFSERVICE tc qdisc [add/replace] dev eth0 root netem [loss/delay/duplicate/latency] [values for each of the type]
+```
+docker exec NAMEOFSERVICE will let us run commands inside of our container
+
+tc - is our main command to mess with the traffic controler
+qdisc - 
+
+
+## What do we gain?
+
+## Ref Used.
+(Kazushi's Medium post)[https://medium.com/@kazushi/simulate-high-latency-network-using-docker-containerand-tc-commands-a3e503ea4307]
+  - Had to change the server container to golang contaier in docker hub to allow the server to run
+  - Had to add iproute2 to the install to client docker container
+
+(Panagiotis's Traffic Control explainer on NetBeez)[https://netbeez.net/blog/how-to-use-the-linux-traffic-control/]
+  - great staring point understand what you can change in the network controler
+
+(Traffic Control command man page)[https://man7.org/linux/man-pages/man8/tc.8.html]
+  - Just the raw detail so if you need it.
